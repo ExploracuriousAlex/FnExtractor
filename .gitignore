@@ -55,3 +55,10 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Runtime output
+exports/
+logs/
+CUE4Parse/
+assets.txt
+oodle-data-shared.dll
