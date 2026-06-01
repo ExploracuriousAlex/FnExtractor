@@ -6,6 +6,7 @@ FortniteGame/Content/Localization/Fortnite_locchunk20/en/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Balance/Datatables/GameDifficultyGrowthBounds
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/CollectionBook/Data/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Heroes/
+FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/Alteration_v2/AttributeAlterations/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/DataTables/CraftingRecipes_New
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/Defenders/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/Schematics/
