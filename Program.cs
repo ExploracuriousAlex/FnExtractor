@@ -18,6 +18,7 @@ using CUE4Parse_Conversion.Textures;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using CUE4Parse_Conversion.Textures.BC;
 
 namespace FnExtractor;
 
@@ -56,7 +57,8 @@ public static class Program
         Log.Information("PNG entries: {Count}, JSON entries: {Count2}", pngEntries.Count, jsonEntries.Count);
 
         OodleHelper.Initialize(OodleHelper.OODLE_NAME_CURRENT);
-        TextureDecoder.UseAssetRipperTextureDecoder = true;
+
+        DetexHelper.Initialize(Path.Combine(AppContext.BaseDirectory, DetexHelper.DLL_NAME));
 
         using var httpClient = new HttpClient();
 
