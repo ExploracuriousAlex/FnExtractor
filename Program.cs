@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CUE4Parse.Compression;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.FileProvider.Objects;
-using CUE4Parse.MappingsProvider;
+using CUE4Parse.MappingsProvider.Usmap;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Localization;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
+using CUE4Parse_Conversion.Options;
 using CUE4Parse_Conversion.Textures;
 using Newtonsoft.Json;
 using Serilog;
@@ -28,6 +30,7 @@ public static class Program
     private const string MappingsUrl = "https://api.fortniteapi.com/v1/mappings";
     private const string AesUrl = "https://api.fortniteapi.com/v1/aes";
     private const string ExportDirectory = "./exports";
+    private static readonly TimeSpan HttpTimeout = TimeSpan.FromSeconds(60);
 
     private static readonly JsonSerializerSettings JsonSettings = new()
     {
@@ -60,7 +63,7 @@ public static class Program
 
         DetexHelper.Initialize(Path.Combine(AppContext.BaseDirectory, DetexHelper.DLL_NAME));
 
-        using var httpClient = new HttpClient();
+        using var httpClient = new HttpClient { Timeout = HttpTimeout };
 
         Log.Information("Fetching AES keys...");
         var aesResponse = await FetchJson<AesResponse>(httpClient, AesUrl);
@@ -276,7 +279,25 @@ public static class Program
 
     private static async Task<T?> FetchJson<T>(HttpClient client, string url) where T : class
     {
-        try { return JsonConvert.DeserializeObject<T>(await client.GetStringAsync(url)); }
+        try
+        {
+            using var response = await client.GetAsync(url);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                Log.Warning("Endpoint not found (404): {Url}", url);
+                return null;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Log.Error("Request failed for {Url} with status {StatusCode}", url, (int) response.StatusCode);
+                return null;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(content);
+        }
         catch (Exception e) { Log.Error(e, "Error fetching {Url}", url); return null; }
     }
 
