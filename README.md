@@ -11,20 +11,20 @@ A command-line tool to quickly extract specific Fortnite game assets (textures a
 
 ## Setup
 
-1. Clone this repository:
+1. Clone this repository (including submodules):
    ```bash
-   git clone https://github.com/ExploracuriousAlex/FnExtractor.git
+   git clone --recurse-submodules https://github.com/ExploracuriousAlex/FnExtractor.git
    cd FnExtractor
    ```
 
-2. Clone CUE4Parse into the project directory:
+2. If you already cloned without `--recurse-submodules`, initialize the submodule now:
    ```bash
-   git clone https://github.com/FabianFG/CUE4Parse.git
+   git submodule update --init --recursive
    ```
    The resulting folder structure should look like:
    ```
    FnExtractor/
-   ├── CUE4Parse/          ← cloned dependency
+   ├── CUE4Parse/          ← git submodule dependency
    ├── Program.cs
    ├── FnExtractor.csproj
    ├── json.txt
@@ -32,7 +32,12 @@ A command-line tool to quickly extract specific Fortnite game assets (textures a
    └── ...
    ```
 
-3. Build the project:
+3. To update CUE4Parse later:
+   ```bash
+   git submodule update --remote --merge CUE4Parse
+   ```
+
+4. Build the project:
    ```bash
    dotnet build
    ```
