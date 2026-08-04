@@ -16,3 +16,5 @@ FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Foundation/Textures/Qu
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Icons/Classes/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Icons/Defenders/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Icons/Icon-Worker/IconDefinitions/
+FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Sprites/
+FortniteGame/Plugins/GameFeatures/SpriteLibrary_CH7S3/Content/
