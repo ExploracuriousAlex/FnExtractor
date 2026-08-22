@@ -75,7 +75,7 @@ public static class Program
         if (mappingsBytes == null) { Log.Error("No mappings available. Exiting."); return; }
 
         // Setup provider
-        var version = new VersionContainer(EGame.GAME_UE5_LATEST, ETexturePlatform.DesktopMobile);
+        var version = new VersionContainer(EGame.GAME_UE6_0, ETexturePlatform.DesktopMobile);
         var provider = new DefaultFileProvider(GameDirectory, SearchOption.TopDirectoryOnly, version);
         provider.ReadNaniteData = false;
         provider.SkipReferencedTextures = true;
