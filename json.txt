@@ -13,13 +13,14 @@ FortniteGame/Content/Localization/Fortnite_locchunk50/de/
 FortniteGame/Content/Localization/Fortnite_locchunk50/en/
 FortniteGame/Content/Localization/Fortnite/de/
 FortniteGame/Content/Localization/Fortnite/en/
+FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Sprites/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Abilities/Traps/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Balance/CombinedStats/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Balance/Datatables/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/CollectionBook/Data/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Heroes/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/Alteration_v2/
-FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/DataTables/CraftingRecipes_New
+FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/DataTables/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/Defenders/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/Schematics/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/STWAccolades/DataTables/STWAccoladeXP
@@ -32,5 +33,5 @@ FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Localization/SaveTheWorld
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Missions/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Icons/Icon-Worker/IconDefinitions
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/World/MissionGens/
-FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Sprites/
 FortniteGame/Plugins/GameFeatures/SpriteLibrary_CH7S3/Content/
+FortniteGame/Plugins/GameFeatures/SpriteLibrary_Ch7S4/Content/

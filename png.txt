@@ -7,6 +7,7 @@ FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Ico
 FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Heroes/Outlander/Portrait/
 FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Heroes/Soldier/Portrait/
 FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Heroes/Variants/
+FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Sprites/
 FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Weapons/Items/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/Items/Weapons/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Foundation/Textures/Icons/Heroes/
@@ -16,5 +17,5 @@ FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Foundation/Textures/Qu
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Icons/Classes/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Icons/Defenders/
 FortniteGame/Plugins/GameFeatures/SaveTheWorld/Content/UI/Icons/Icon-Worker/IconDefinitions/
-FortniteGame/Plugins/GameFeatures/BRCosmetics/Content/UI/Foundation/Textures/Icons/Sprites/
 FortniteGame/Plugins/GameFeatures/SpriteLibrary_CH7S3/Content/
+FortniteGame/Plugins/GameFeatures/SpriteLibrary_Ch7S4/Content/
