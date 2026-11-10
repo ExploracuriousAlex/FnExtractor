@@ -28,7 +28,9 @@ public static class Program
 {
     private const string GameDirectory = @"C:\Program Files\Epic Games\Fortnite\FortniteGame\Content\Paks";
     private const string MappingsUrl = "https://api.fortniteapi.com/v1/mappings";
+    private const string MappingsFallbackUrl = "https://uedb.dev/svc/api/v1/fortnite/mappings";
     private const string AesUrl = "https://api.fortniteapi.com/v1/aes";
+    private const string AesFallbackUrl = "https://uedb.dev/svc/api/v1/fortnite/aes";
     private const string ExportDirectory = "./exports";
     private static readonly TimeSpan HttpTimeout = TimeSpan.FromSeconds(60);
 
@@ -67,7 +69,12 @@ public static class Program
 
         Log.Information("Fetching AES keys...");
         var aesResponse = await FetchJson<AesResponse>(httpClient, AesUrl);
-        if (aesResponse == null) { Log.Error("No AES keys available. Exiting."); return; }
+        if (string.IsNullOrWhiteSpace(aesResponse?.MainKey))
+        {
+            Log.Warning("No AES keys from primary endpoint. Trying fallback: {Url}", AesFallbackUrl);
+            aesResponse = await FetchJson<AesResponse>(httpClient, AesFallbackUrl);
+        }
+        if (string.IsNullOrWhiteSpace(aesResponse?.MainKey)) { Log.Error("No AES keys available. Exiting."); return; }
         Log.Information("AES version: {Version}", aesResponse.Version);
 
         Log.Information("Fetching mappings...");
@@ -238,17 +245,47 @@ public static class Program
 
     private static async Task<byte[]?> FetchMappings(HttpClient client)
     {
+        var bytes = await FetchMappings(client, MappingsUrl);
+        if (bytes != null) return bytes;
+
+        Log.Warning("No mappings from primary endpoint. Trying fallback: {Url}", MappingsFallbackUrl);
+        return await FetchMappings(client, MappingsFallbackUrl, useFallbackFormat: true);
+    }
+
+    private static async Task<byte[]?> FetchMappings(HttpClient client, string url, bool useFallbackFormat = false)
+    {
         try
         {
-            var json = await client.GetStringAsync(MappingsUrl);
-            var mappings = JsonConvert.DeserializeObject<List<MappingsEntry>>(json);
-            var entry = mappings?.FirstOrDefault();
-            if (entry?.Url == null) { Log.Error("No mappings entry found"); return null; }
+            string? downloadUrl;
+            string? fileName;
+            if (useFallbackFormat)
+            {
+                var mappings = await FetchJson<MappingsFallbackResponse>(client, url);
+                downloadUrl = mappings?.Mappings?.GetValueOrDefault("ZStandard");
+                fileName = mappings?.Version;
+            }
+            else
+            {
+                var mappings = await FetchJson<List<MappingsEntry>>(client, url);
+                var entry = mappings?.FirstOrDefault();
+                downloadUrl = entry?.Url;
+                fileName = entry?.FileName;
+            }
 
-            Log.Information("Downloading mappings: {File}", entry.FileName);
-            return await client.GetByteArrayAsync(entry.Url);
+            if (string.IsNullOrWhiteSpace(downloadUrl))
+            {
+                Log.Warning("No mappings entry found at {Url}", url);
+                return null;
+            }
+
+            Log.Information("Downloading mappings: {File}", fileName);
+            var bytes = await client.GetByteArrayAsync(downloadUrl);
+            if (bytes.Length > 0) return bytes;
+
+            Log.Warning("Empty mappings download from {Url}", downloadUrl);
+            return null;
         }
-        catch (Exception e) { Log.Error(e, "Error fetching mappings"); return null; }
+        catch (Exception e) { Log.Error(e, "Error fetching mappings from {Url}", url); return null; }
     }
 
     private static void SubmitKeys(DefaultFileProvider provider, AesResponse aes)
@@ -342,4 +379,10 @@ public class MappingsEntry
     [JsonProperty("fileName")] public string? FileName { get; set; }
     [JsonProperty("url")] public string? Url { get; set; }
     [JsonProperty("hash")] public string? Hash { get; set; }
+}
+
+public class MappingsFallbackResponse
+{
+    [JsonProperty("version")] public string? Version { get; set; }
+    [JsonProperty("mappings")] public Dictionary<string, string>? Mappings { get; set; }
 }
