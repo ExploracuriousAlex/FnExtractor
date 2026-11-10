@@ -20,7 +20,6 @@ using CUE4Parse_Conversion.Textures;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using CUE4Parse_Conversion.Textures.BC;
 
 namespace FnExtractor;
 
@@ -52,18 +51,18 @@ public static class Program
         var pngEntries = ReadConfigFile("png.txt");
         var jsonEntries = ReadConfigFile("json.txt");
         var exportAssetList = args.Contains("--assets", StringComparer.OrdinalIgnoreCase);
+        var exportRaw = args.Contains("--raw", StringComparer.OrdinalIgnoreCase);
+        var exportConverted = pngEntries.Count > 0 || jsonEntries.Count > 0;
 
-        if (pngEntries.Count == 0 && jsonEntries.Count == 0 && !exportAssetList)
+        if (!exportConverted && !exportAssetList && !exportRaw)
         {
-            Log.Error("No entries configured in png.txt or json.txt. Use --assets to export asset list. Exiting.");
+            Log.Error("No entries configured in png.txt or json.txt. Use --assets to export asset list or --raw to export all UAssets. Exiting.");
             return;
         }
 
         Log.Information("PNG entries: {Count}, JSON entries: {Count2}", pngEntries.Count, jsonEntries.Count);
 
         OodleHelper.Initialize(OodleHelper.OODLE_NAME_CURRENT);
-
-        DetexHelper.Initialize(Path.Combine(AppContext.BaseDirectory, DetexHelper.DLL_NAME));
 
         using var httpClient = new HttpClient { Timeout = HttpTimeout };
 
@@ -77,23 +76,31 @@ public static class Program
         if (string.IsNullOrWhiteSpace(aesResponse?.MainKey)) { Log.Error("No AES keys available. Exiting."); return; }
         Log.Information("AES version: {Version}", aesResponse.Version);
 
-        Log.Information("Fetching mappings...");
-        var mappingsBytes = await FetchMappings(httpClient);
-        if (mappingsBytes == null) { Log.Error("No mappings available. Exiting."); return; }
+        byte[]? mappingsBytes = null;
+        if (exportConverted)
+        {
+            Log.Information("Fetching mappings...");
+            mappingsBytes = await FetchMappings(httpClient);
+            if (mappingsBytes == null) { Log.Error("No mappings available. Exiting."); return; }
+        }
 
         // Setup provider
         var version = new VersionContainer(EGame.GAME_UE6_0, ETexturePlatform.DesktopMobile);
         var provider = new DefaultFileProvider(GameDirectory, SearchOption.TopDirectoryOnly, version);
         provider.ReadNaniteData = false;
         provider.SkipReferencedTextures = true;
-        provider.MappingsContainer = new InMemoryUsmapProvider(mappingsBytes);
+        if (mappingsBytes != null)
+            provider.MappingsContainer = new InMemoryUsmapProvider(mappingsBytes);
 
         provider.Initialize();
         SubmitKeys(provider, aesResponse);
         provider.PostMount();
 
-        try { provider.LoadLocalization(ELanguage.English); }
-        catch (KeyNotFoundException) { Log.Warning("Localization data not available, skipping"); }
+        if (exportConverted)
+        {
+            try { provider.LoadLocalization(ELanguage.English); }
+            catch (KeyNotFoundException) { Log.Warning("Localization data not available, skipping"); }
+        }
 
         // Build folder index for batch lookups
         var folderIndex = provider.Files.Values
@@ -109,21 +116,53 @@ public static class Program
             Log.Information("Written {Count} asset paths to assets.txt", allPaths.Count);
         }
 
+        var rawCount = exportRaw ? await ExportRawAssets(provider) : 0;
         var pngCount = await ExportPngs(provider, pngEntries, folderIndex);
         var jsonCount = await ExportJsons(provider, jsonEntries, folderIndex);
 
         stopwatch.Stop();
-        Log.Information("Done! Exported {PngCount} PNGs and {JsonCount} JSONs to {Dir} in {Elapsed}",
-            pngCount, jsonCount, Path.GetFullPath(ExportDirectory), stopwatch.Elapsed);
+        Log.Information("Done! Exported {RawCount} raw UAsset packages, {PngCount} PNGs and {JsonCount} JSONs to {Dir} in {Elapsed}",
+            rawCount, pngCount, jsonCount, Path.GetFullPath(ExportDirectory), stopwatch.Elapsed);
 
         provider.Dispose();
     }
 
     // --- Export logic ---
 
+    private static async Task<int> ExportRawAssets(DefaultFileProvider provider)
+    {
+        var count = 0;
+        foreach (var file in provider.Files.Values.Where(f =>
+                     f.Path.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)))
+        {
+            try
+            {
+                var packageFiles = await provider.SavePackageAsync(file);
+                foreach (var (path, data) in packageFiles)
+                {
+                    var outputPath = Path.Combine(ExportDirectory, "raw", path);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+                    await File.WriteAllBytesAsync(outputPath, data);
+                }
+
+                count++;
+                Log.Information("Exported raw UAsset: {Path}", file.Path);
+            }
+            catch (Exception e)
+            {
+                Log.Warning("Failed to export raw UAsset {Path}: {Error}", file.Path, e.Message);
+            }
+        }
+        return count;
+    }
+
     private static async Task<int> ExportPngs(DefaultFileProvider provider,
         List<string> entries, Dictionary<string, GameFile[]> folderIndex)
     {
+        var options = new ExportOptions(
+            texturePlatform: provider.Versions.Platform,
+            textureFormat: ETextureFormat.Png,
+            exportHdrTexturesAsHdr: false);
         var count = 0;
         foreach (var file in ResolveFiles(provider, entries, folderIndex))
         {
@@ -133,10 +172,10 @@ public static class Program
 
                 foreach (var texture in package.GetExports().OfType<UTexture>())
                 {
-                    var bitmap = texture.Decode(provider.Versions.Platform);
+                    var bitmap = texture.Decode(options);
                     if (bitmap == null) continue;
 
-                    var encoded = bitmap.Encode(ETextureFormat.Png, false, out _);
+                    var encoded = bitmap.Encode(options, out _);
                     var outputPath = Path.Combine(ExportDirectory, GetFolder(file.Path), $"{texture.Name}.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
                     await File.WriteAllBytesAsync(outputPath, encoded);

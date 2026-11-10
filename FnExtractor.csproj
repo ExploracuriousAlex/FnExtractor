@@ -34,10 +34,6 @@
         <None Update="json.txt">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Include="CUE4Parse\CUE4Parse-Conversion\Resources\Detex.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <TargetPath>Detex.dll</TargetPath>
-        </None>
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ A command-line tool to quickly extract specific Fortnite game assets (textures a
 
 ## Prerequisites
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (x64)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (x64)
 - [CMake](https://cmake.org/) installed
 - [C++ Desktop Development](https://learn.microsoft.com/en-us/cpp/ide/using-the-visual-studio-ide-for-cpp-desktop-development) workload for Visual Studio installed
 - Fortnite installed (default path: `C:\Program Files\Epic Games\Fortnite`)
@@ -55,11 +55,19 @@ The extractor reads `png.txt` and `json.txt` to determine which assets to export
 | Flag       | Description                                      |
 |------------|--------------------------------------------------|
 | `--assets` | Export a full list of all asset paths to `assets.txt` (useful for discovering available paths) |
+| `--raw` | Export all mounted `.uasset` packages and their available companion files (`.uexp`, `.ubulk`, `.uptnl`) to `./exports/raw`, preserving the original folder structure |
 
 Example:
 ```bash
 dotnet run -- --assets
 ```
+
+To export all UAssets as raw binary files:
+```bash
+dotnet run -- --raw
+```
+
+Raw export works with empty or missing configuration files and does not require mappings when no PNG or JSON exports are configured. Configured PNG and JSON exports still run alongside it. Files are extracted and decrypted/decompressed without conversion; cooked IoStore packages retain their original format.
 
 ## Configuration Files
 
